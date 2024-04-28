@@ -37,25 +37,27 @@ edges[i].length == 2
 ai != bi
 The given input represents a valid tree.*/
 
+#include <stdlib.h>
+
+typedef struct Node {
+    int val;
+    struct Node* next;
+} Node;
 
 int* sumOfDistancesInTree(int n, int** edges, int edgesSize, int* edgesColSize, int* returnSize) {
     // Initialize the adjacency list
-    int** g = (int**)malloc(n * sizeof(int*));
-    for (int i = 0; i < n; i++) {
-        g[i] = (int*)malloc(n * sizeof(int));
-    }
-    
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            g[i][j] = 0;
-        }
-    }
-    
+    Node** g = (Node**)calloc(n, sizeof(Node*));
     for (int i = 0; i < edgesSize; i++) {
         int a = edges[i][0];
         int b = edges[i][1];
-        g[a][b] = 1;
-        g[b][a] = 1;
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        newNode->val = b;
+        newNode->next = g[a];
+        g[a] = newNode;
+        newNode = (Node*)malloc(sizeof(Node));
+        newNode->val = a;
+        newNode->next = g[b];
+        g[b] = newNode;
     }
 
     // Initialize the result array
@@ -79,7 +81,12 @@ int* sumOfDistancesInTree(int n, int** edges, int edgesSize, int* edgesColSize, 
 
     // Free memory
     for (int i = 0; i < n; i++) {
-        free(g[i]);
+        Node* curr = g[i];
+        while (curr) {
+            Node* temp = curr;
+            curr = curr->next;
+            free(temp);
+        }
     }
     free(g);
     free(count);
@@ -89,23 +96,23 @@ int* sumOfDistancesInTree(int n, int** edges, int edgesSize, int* edgesColSize, 
     return ans;
 }
 
-void dfs(int s, int** g, int p, int d, int* pd_0, int* count, int n) {
+void dfs(int s, Node** g, int p, int d, int* pd_0, int* count, int n) {
     count[s] = 1;
     pd_0[s] = 0;
-    for (int i = 0; i < n; i++) {
-        if (g[s][i] && i != p) {
-            dfs(i, g, s, d + 1, pd_0, count, n);
-            count[s] += count[i];
-            pd_0[s] += pd_0[i] + count[i];
+    for (Node* curr = g[s]; curr; curr = curr->next) {
+        if (curr->val != p) {
+            dfs(curr->val, g, s, d + 1, pd_0, count, n);
+            count[s] += count[curr->val];
+            pd_0[s] += pd_0[curr->val] + count[curr->val];
         }
     }
 }
 
-void dfs2(int s, int** g, int p, int* pd_all, int n, int* count) {
-    for (int i = 0; i < n; i++) {
-        if (g[s][i] && i != p) {
-            pd_all[i] = pd_all[s] - count[i] + (n - count[i]);
-            dfs2(i, g, s, pd_all, n, count);
+void dfs2(int s, Node** g, int p, int* pd_all, int n, int* count) {
+    for (Node* curr = g[s]; curr; curr = curr->next) {
+        if (curr->val != p) {
+            pd_all[curr->val] = pd_all[s] - count[curr->val] + (n - count[curr->val]);
+            dfs2(curr->val, g, s, pd_all, n, count);
         }
     }
 }
