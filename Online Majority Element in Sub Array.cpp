@@ -1,4 +1,4 @@
-Design a data structure that efficiently finds the majority element of a given subarray.
+/*Design a data structure that efficiently finds the majority element of a given subarray.
 
 The majority element of a subarray is an element that occurs threshold times or more in the subarray.
 
@@ -31,7 +31,7 @@ Constraints:
 threshold <= right - left + 1
 2 * threshold > right - left + 1
 At most 104 calls will be made to query.
-
+*/
 
 #include <vector>
 #include <unordered_map>
